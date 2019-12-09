@@ -4,7 +4,7 @@ Objetivo
 - [X] Resolver o problema das 8 rainhas usando Algoritmo genético
 
 ```
-def comoFio():
+def comoFoi():
    print("Foi complicado, mas não impossível")
 ```  
 
