@@ -125,6 +125,169 @@ def fitness(individuo, geracao):
                         print('Rainha ', colunaDaRainha+1,' ataca ', individuo[i][j])
 
         print("\n")
+ def torneio(participantes, k = 1, t = 2, rodadaNr = 1):
+    # q = A quantidade de individúos na geração
+    
+    # k = Se o valor de k = 1, o método de torneio é dito determinístico, 
+    # por selecionar sempre o melhor indivíduo da população
+    # Obs.:deve ser um valor entre 0 e 1
+
+    # t = Representa quantos indivíduos vão competir entre si
+
+    q = len(participantes)
+
+    if (q <= t):
+        if q == 1:
+            return 0
+        else:
+            return participantes
+    
+    # Prepara a estrutura das (q) competições que vão acontecer na rodada do torneio
+    rodada = [i for i in range(q)]
+    for i in range(q):
+        rodada[i] = [a for a in range(t)]
+
+    # Prepara a estrutura dos vencedores de cada competição
+    vencedores = [0 for i in range(q)]
+    for i in range(q):
+        vencedores[i] = [0 for a in range(2)]
+
+    # Define quais são os (t) indivíduos que vão competir entre si
+    for i in range(q):
+        for j in range(t):
+            rodada[i][j] = random.randint(0,q-1)
+    
+    print(' ')
+    print('Rodada nº:',rodadaNr)
+    for i in range(q):
+        print(rodada[i])
+
+    print(' ')
+    print('Resultado da rodada nº:',rodadaNr)
+    for i in range(q):
+        for j in range(t):
+            individuo = rodada[i][j]
+            if (rodadaNr > 1):
+                fitness = participantes[individuo][1]  
+            else:
+                fitness = participantes[individuo][8]  
+            if (k == 1): # determinístico = seleciona o melhor indivíduo da população
+                print('individuo : ',individuo,' - fitness: ',fitness,' - quem esta ganhando:',vencedores[i][0],' seu fitness é: ',vencedores[i][1])
+                if (fitness >= vencedores[i][1] ):
+                    vencedores[i][0] = individuo
+                    vencedores[i][1] = fitness
+            if (k == 0): # não determinístico = seleciona o pior indivíduo da população
+                if (fitness < vencedores[i][1]):
+                    vencedores[i][0] = individuo
+                    vencedores[i][1] = fitness 
+        print(vencedores[i]) 
+    
+    print(' ')
+    print('Os vencedores da rodada nº:',rodadaNr)
+    
+    proxFase = [-1 for i in range(q)]
+    for i in range(q):
+        proxFase[i] = [-1 for a in range(2)]
+
+    for i in range(q):
+        if ( vencedores[i] not in proxFase ):
+            proxFase[i] = vencedores[i]
+
+    for i in range(q):
+        if ([-1,-1] in proxFase):
+            proxFase.remove([-1,-1])
+
+    for i in range(len(proxFase)):
+        print(proxFase[i])
+
+    rodadaNr += 1
+    resultado = torneio(proxFase, k, t, rodadaNr)
+
+    if (resultado == 0):
+        return proxFase
+    else:
+        return resultado
+
+def crossoverUniforme(geracao, parent1, parent2):
+    child1 = [x for x in range(8)]
+    child2 = [x for x in range(8)]
+    for i in range(8):
+        selecao = random.randint(0,1)
+        if(selecao == 1):
+            child1[i] = geracao[parent1][i]
+            child2[i] = geracao[parent2][i]
+        elif(selecao == 0):
+            child1[i] = geracao[parent2][i]
+            child2[i] = geracao[parent1][i]
+    #gera um número aleatório float entre 0 e 1
+    m = random.uniform(0,1)
+    #verifica se o número gerado é menor que a probabilidade
+    if(m < PROBABILIDADE_MUTACAO):
+        #se verdadeiro realiza a mutação 
+        child1 = mutacao(child1)
+        child2 = mutacao(child2)
+    
+    return (child1, child2)
+
+def crossoverUmPonto(geracao, parent1, parent2):
+    #cria dois vetores que vao receber os valores dos pais
+    child1 = [x for x in range(8)]
+    child2 = [x for x in range(8)]
+    i = 0
+    while(i < CORTE):
+        #de i ate o valor de corte definido os filhos recebem os primeiros valores
+        child1[i] = geracao[parent1][i]
+        child2[i] = geracao[parent2][i]
+        i += 1
+    while(i < 8):
+        #i que agora é igual o valor de corte - 1 vai até 7 para os filhos receberem os últimos valores
+        child1[i] = geracao[parent2][i]
+        child2[i] = geracao[parent1][i]
+        i += 1
+    #gera um número aleatório float entre 0 e 1
+    m = random.uniform(0,1)
+    #verifica se o número gerado é menor que a probabilidade
+    if(m < PROBABILIDADE_MUTACAO):
+        #se verdadeiro realiza a mutação 
+        child1 = mutacao(child1)
+        child2 = mutacao(child2)
+    
+    return (child1, child2)
+
+def mutacao(child):
+    index = random.randint(0,7)
+    child[index] = random.randint(0,7)
+    return child
+
+
+QTDE_INDIVIDUOS = int(input("Informe a quantidade de Individuos"))
+f.write("Quantidade de individuos selecionados = "+ str(QTDE_INDIVIDUOS))
+geracao = [x for x in range(QTDE_INDIVIDUOS)]
+for i in range(QTDE_INDIVIDUOS):
+    geracao[i] = geraPosicoes()
+imprimeGeracao(geracao)
+imprimeRainhas(geracao)
+for i in range(QTDE_INDIVIDUOS):
+    individuo = retornaIndividuo(geracao, i)
+    fitness_individuo = fitness(individuo, geracao[i])
+    geracao[i].append(fitness_individuo)
+print("INDIVÍDUOS COM SEUS RESPECTIVOS FITNESS")
+imprimeGeracao(geracao)
+parent1, parent2 = roleta(geracao)
+#child1, child2 = crossoverUmPonto(geracao,parent1,parent2)
+#child = retornaChild(child1)
+#fitness = fitness(child, child1)
+child1, child2 = crossoverUniforme(geracao, parent1, parent2)
+print(child1)
+print(child2)
+#torneio(geracao)
+
+# Arquivo
+# "x" - Create - cria o arquivo ee retorna mensagem de erro caso o arquivo exista
+# "a" - Append - vai criar o arquivo caso o caminho especificado não exista
+#       Vai escrever no final do arquivo
+# "w" - Write - vai criar o arquivo caso o caminho especificado não exista 
+#       Vai sobreescrever o conteudo do arquivo
     print('Confrontos :', confrontos)
     print('Fitness Final :',FITNESS-(confrontos/2))
     return int(FITNESS - (confrontos/2))
