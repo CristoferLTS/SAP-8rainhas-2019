@@ -1,2 +1,11 @@
-# SAP-8rainhas-2019
-Projeto para disciplina de Sistemas de Apoio a Decisão
+# 8 Rainhas
+
+Objetivo
+- [X] Resolver o problema das 8 rainhas usando Algoritmo genético
+
+```
+def comoFio():
+   print("Foi complicado, mas não impossível")
+```  
+
+
